@@ -8,3 +8,4 @@ function solution(str) {
     }
     return printResult;
 }
+
