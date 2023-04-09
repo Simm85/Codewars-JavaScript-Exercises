@@ -7,7 +7,10 @@ function deleteNth(arr, n) {
             const currentNumber = arr[i];
             if (testNumber === currentNumber) {
                 counter++;
-                if (counter > n) arr.splice(i, 1);
+                if (counter > n) {
+                    arr.splice(i, 1);
+                    break;
+                }
             }
         }
     }
