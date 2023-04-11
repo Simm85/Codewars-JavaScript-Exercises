@@ -1,15 +1,12 @@
 function findUniq(arr) {
-    let obj = {};
+    const obj = {};
     for (let i = 0; i < arr.length; i++) {
         obj.hasOwnProperty(arr[i]) ? obj[arr[i]]++ : obj[arr[i]] = 1;
     }
 
-    let uniq = 0;
-    for (let key in obj) {
-        if (obj[key] === 1) uniq = Number(key);
+    for (const key in obj) {
+        if (obj[key] === 1) return Number(key);
     }
-
-    return uniq;
 }
 
 findUniq([0, 0, 1]);
