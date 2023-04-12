@@ -1,2 +1,2 @@
 # Codewars JavaScript Exercises
- Coding practice and fun.
+ Coding practice for fun.
