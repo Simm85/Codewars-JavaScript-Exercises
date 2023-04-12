@@ -1,6 +1,6 @@
 function solution(input, markers) {
     input = input.split('\n');
-    let result = [];
+    const result = [];
     for (let string of input) {
         const index1 = string.indexOf(markers[0]);
         const index2 = string.indexOf(markers[1]);
