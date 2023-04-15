@@ -1,4 +1,4 @@
-function cakes(recipe, available) {
+function cakes(recipe, available) {    
     let cakesCount = 0;
     for (const key in recipe) {
         if (!available.hasOwnProperty(key) || available[key] < recipe[key]) return cakesCount;
