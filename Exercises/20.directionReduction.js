@@ -19,6 +19,9 @@ dirReduc(["NORTH", "EAST", "NORTH", "EAST", "WEST", "WEST", "EAST", "EAST", "WES
 //  [ 'NORTH', 'EAST' ]
 dirReduc(["EAST", "EAST", "WEST", "NORTH", "WEST", "EAST", "EAST", "SOUTH", "NORTH", "WEST"]);
 // [ 'EAST', 'NORTH' ]
-dirReduc(["NORTH", "SOUTH", "SOUTH", "EAST", "WEST", "NORTH", "WEST"]) // [west]
-dirReduc(["NORTH", "WEST", "SOUTH", "EAST"]) // ["NORTH", "WEST", "SOUTH", "EAST"]
-dirReduc(["NORTH", "SOUTH", "EAST", "WEST", "EAST", "WEST"]); // []
+dirReduc(["NORTH", "SOUTH", "SOUTH", "EAST", "WEST", "NORTH", "WEST"])
+// [west]
+dirReduc(["NORTH", "WEST", "SOUTH", "EAST"]);
+// ["NORTH", "WEST", "SOUTH", "EAST"]
+dirReduc(["NORTH", "SOUTH", "EAST", "WEST", "EAST", "WEST"]);
+// []
