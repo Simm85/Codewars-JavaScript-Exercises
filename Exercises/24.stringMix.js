@@ -1,45 +1,10 @@
 function mix(s1, s2) {
-  const obj_1 = {};
-  const obj_2 = {};
-  let strArray = [];
-  modString(s1, obj_1);
-  modString(s2, obj_2);
-  const length = Object.keys(obj_2).length;
-  let prefix = '';
-  for (let i = 0; i < length; i++) {
-    const currentKey = Object.keys(obj_2);
-    if (obj_1.hasOwnProperty(currentKey[i])) {
-      if (obj_1[currentKey[i]].length === obj_2[currentKey[i]].length) {
-        prefix = '=:';
-        obj_1[currentKey[i]] = prefix + obj_1[currentKey[i]];
-      } else if (obj_1[currentKey[i]].length > obj_2[currentKey[i]].length) {
-        prefix = '1:';
-        obj_1[currentKey[i]] = prefix + obj_1[currentKey[i]];
-      } else {
-        prefix = '2:';
-        obj_1[currentKey[i]] = prefix + obj_2[currentKey[i]];
-      }
-    } else {
-      prefix = '2:';
-      obj_1[currentKey[i]] = prefix + obj_2[currentKey[i]];
-    }
-  }
-
-  for (const key in obj_1) {
-    if (!obj_1[key].includes(':')) obj_1[key] = '1:' + obj_1[key];
-  }
-
-  strArray = Object.values(obj_1);
-
-  strArray.sort((a, b) => {
-    if (a.length === b.length) {
-      return a > b ? 1 : -1;
-    } else {
-      return b.length - a.length;
-    }
-  });
-
-  console.log(strArray.join('/'));
+  const objectA = {};
+  const objectB = {};
+  modString(s1, objectA);
+  modString(s2, objectB);
+  const length = Object.keys(objectB).length;
+  return result(length);
 
   function modString(str, obj) {
     str = [...str.matchAll(/[a-z]+/g)].join('');
@@ -54,8 +19,34 @@ function mix(s1, s2) {
     }
     return obj;
   }
+
+  function result(length) {
+    for (let i = 0; i < length; i++) {
+      const key = Object.keys(objectB);
+      if (objectA.hasOwnProperty(key[i])) {
+        if (objectA[key[i]].length === objectB[key[i]].length) {
+          objectA[key[i]] = '=:' + objectA[key[i]];
+        } else if (objectA[key[i]].length > objectB[key[i]].length) {
+          objectA[key[i]] = '1:' + objectA[key[i]];
+        } else {
+          objectA[key[i]] = '2:' + objectB[key[i]];
+        }
+      } else {
+        objectA[key[i]] = '2:' + objectB[key[i]];
+      }
+    }
+
+    for (const key in objectA) {
+      if (!objectA[key].includes(':')) objectA[key] = '1:' + objectA[key];
+    }
+
+    return Object.values(objectA).sort((a, b) => {
+      if (a.length === b.length) return a > b ? 1 : -1;
+      return b.length - a.length;
+    }).join('/');
+  }
 }
-//mix("Are they here", "yes, they are here");
+mix("Are they here", "yes, they are here");
 // "2:eeeee/2:yy/=:hh/=:rr"
 mix("looping is fun but dangerous", "less dangerous than coding");
 // "1:ooo/1:uuu/2:sss/=:nnn/1:ii/2:aa/2:dd/2:ee/=:gg"
