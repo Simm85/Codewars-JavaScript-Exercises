@@ -1,9 +1,9 @@
 function mix(s1, s2) {
   const objectA = {};
   const objectB = {};
+  const length = Object.keys(objectB).length;
   modString(s1, objectA);
   modString(s2, objectB);
-  const length = Object.keys(objectB).length;
   return result(length);
 
   function modString(str, obj) {
@@ -23,17 +23,15 @@ function mix(s1, s2) {
   function result(length) {
     for (let i = 0; i < length; i++) {
       const key = Object.keys(objectB);
+      const objALength = objectA[key[i]].length;
+      const objBLength = objectB[key[i]].length;
       if (objectA.hasOwnProperty(key[i])) {
-        if (objectA[key[i]].length === objectB[key[i]].length) {
-          objectA[key[i]] = '=:' + objectA[key[i]];
-        } else if (objectA[key[i]].length > objectB[key[i]].length) {
-          objectA[key[i]] = '1:' + objectA[key[i]];
-        } else {
-          objectA[key[i]] = '2:' + objectB[key[i]];
-        }
-      } else {
-        objectA[key[i]] = '2:' + objectB[key[i]];
+        if (objALength === objBLength) objectA[key[i]] = '=:' + objectA[key[i]];
+        else if (objALength > objBLength) objectA[key[i]] = '1:' + objectA[key[i]];
+        else objectA[key[i]] = '2:' + objectB[key[i]];
+        continue;
       }
+      objectA[key[i]] = '2:' + objectB[key[i]];
     }
 
     for (const key in objectA) {
