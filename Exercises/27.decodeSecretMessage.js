@@ -1,0 +1,8 @@
+function decodeMsg(string) {
+
+
+
+
+    
+}
+decodeMsg()
