@@ -24,19 +24,18 @@ function hand(holeCards, communityCards) {
       }
 
       function sortCardsInDescendingOrder(array) {
-            array.sort((a, b) => {
+            return array.sort((a, b) => {
                   let cardA = cardElements(a)[1];
                   let cardB = cardElements(b)[1];
-                  cardA = Number(cardA);
-                  cardB = Number(cardB);
 
                   const isCardAbove10 = /[AKQJ]{1}/.test(cardA) || /[AKQJ]{1}/.test(cardB);
-                  
+
                   if (isCardAbove10) {
                         cardA = reassignCardAsNumber(cardA);
                         cardB = reassignCardAsNumber(cardB);
                   }
-                  return cardB - cardA;
+
+                  return Number(cardB) - Number(cardA);
             });
 
             function reassignCardAsNumber(card) {
