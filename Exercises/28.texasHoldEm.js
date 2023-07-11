@@ -15,24 +15,27 @@ function hand(holeCards, communityCards) {
 
       function straightFlush() {
             let isStraight = false;
-            if (catchFlushDraw(totalCards)) {
+            if (isFlushDraw(totalCards)) {
                   removeSpareCardsByPaint(totalCards);
                   sortCardsInDescendingOrder(totalCards);
+                  console.log(totalCards);
                   return true;
             }
       }
 
       function sortCardsInDescendingOrder(array) {
-            return array.sort((a, b) => {
+            array.sort((a, b) => {
                   let cardA = cardElements(a)[1];
                   let cardB = cardElements(b)[1];
+                  cardA = Number(cardA);
+                  cardB = Number(cardB);
+
                   const isCardAbove10 = /[AKQJ]{1}/.test(cardA) || /[AKQJ]{1}/.test(cardB);
+                  
                   if (isCardAbove10) {
                         cardA = reassignCardAsNumber(cardA);
                         cardB = reassignCardAsNumber(cardB);
                   }
-                  cardA = Number(cardA);
-                  cardB = Number(cardB);
                   return cardB - cardA;
             });
 
@@ -83,7 +86,7 @@ function hand(holeCards, communityCards) {
 
       }
 
-      function catchFlushDraw(array) {
+      function isFlushDraw(array) {
             let spades = 0;
             let clubs = 0;
             let diamonds = 0;
@@ -115,7 +118,6 @@ function hand(holeCards, communityCards) {
                   }
                   return prevCard = currentCard;
             });
-            console.log(array);
       }
 }
 
