@@ -1,17 +1,21 @@
 function hand(holeCards, communityCards) {
       const totalCards = [...holeCards, ...communityCards];
-      const pattern = /(?<kind>[AKQJ\d]+)(?<paint>[♠♣♦♥]{1})/;
-      const cardElements = string => pattern.exec(string);
-      const isCardAbove10 = (string__1, string__2) => /[AKQJ]{1}/.test(string__1) || /[AKQJ]{1}/.test(string__2);
+      const cardElements = string => {
+            const pattern = /(?<kind>[AKQJ\d]+)(?<paint>[♠♣♦♥]{1})/;
+            return pattern.exec(string);
+      }
+      const isCardAbove10 = (string_1, string_2) => {
+            const pattern = /[AKQJ]{1}/;
+            return pattern.test(string_1) || pattern.test(string_2);
+      }
       const result = {
             type: null,
             ranks: [],
       }
-      let isHandFinished = false;
 
       straightFlush();
       flush();
-
+      fourOfAKind();
 
       function straightFlush() {
             if (isFlushDraw(totalCards)) {
@@ -22,13 +26,38 @@ function hand(holeCards, communityCards) {
                         result.type = 'straight-flush';
                         totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
                         console.log(JSON.stringify(result));
-                        return true;
+                        return result;
                   }
             }
       }
 
       function fourOfAKind() {
+            isFourOfKind(totalCards);
+      }
 
+      function isFourOfKind(cards) {
+            const cardCollection = {};
+            for (const card of cards) {
+                  const cardKind = cardElements(card)[1];
+                  if (cardCollection.hasOwnProperty(cardKind)) {
+                        cardCollection[cardKind]++;
+                        continue;
+                  }
+                  cardCollection[cardKind] = 1;
+
+            }
+
+            for (const key in cardCollection) {
+                  if (cardCollection[key] === 4) {
+                        result.type = 'four-of-a-kind';
+                        result.ranks.unshift(key);
+                        continue;
+                  }
+                  result.ranks.push(key);
+            }
+
+            console.log(cardCollection, JSON.stringify(result));
+            return result;
       }
 
       function fullHouse() {
@@ -40,12 +69,11 @@ function hand(holeCards, communityCards) {
                   removeSpareCardsByPaint(totalCards);
                   sortCardsInDescendingOrder(totalCards);
                   removeSpareCardsByLowestValue(totalCards);
-
                   if (!isStraightDraw(totalCards)) {
                         result.type = 'flush';
                         totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
                         console.log(JSON.stringify(result));
-                        return true;
+                        return result;
                   }
             }
       }
@@ -70,14 +98,14 @@ function hand(holeCards, communityCards) {
 
       }
 
-      function isFlushDraw(array) {
+      function isFlushDraw(cards) {
             let spades = 0;
             let clubs = 0;
             let diamonds = 0;
             let hearts = 0;
             let cardPaint = '';
 
-            for (const card of array) {
+            for (const card of cards) {
                   cardPaint = cardElements(card)[2];
                   switch (cardPaint) {
                         case '♠': spades++; break;
@@ -86,25 +114,25 @@ function hand(holeCards, communityCards) {
                         case '♥': hearts++; break;
                   }
 
-                  if (spades >= 5 || clubs >= 5 || diamonds >= 5 || hearts >= 5) {
+                  if (spades === 5 || clubs === 5 || diamonds === 5 || hearts === 5) {
                         return true;
                   }
             }
       }
 
-      function removeSpareCardsByPaint(array) {
-            array.reduce((prevCard, currentCard) => {
+      function removeSpareCardsByPaint(cards) {
+            cards.reduce((prevCard, currentCard) => {
                   const prevCardPaint = cardElements(prevCard)[2];
                   const currentCardPaint = cardElements(currentCard)[2];
                   if (prevCardPaint !== currentCardPaint) {
-                        array.splice(array.indexOf(prevCard), 1);
+                        cards.splice(cards.indexOf(prevCard), 1);
                   }
                   return prevCard = currentCard;
             });
       }
 
-      function sortCardsInDescendingOrder(array) {
-            return array.sort((a, b) => {
+      function sortCardsInDescendingOrder(cards) {
+            return cards.sort((a, b) => {
                   let cardA = cardElements(a)[1];
                   let cardB = cardElements(b)[1];
 
@@ -126,16 +154,16 @@ function hand(holeCards, communityCards) {
             return card;
       }
 
-      function removeSpareCardsByLowestValue(array) {
-            if (array.length > 5) {
-                  array.splice(5, 2);
+      function removeSpareCardsByLowestValue(cards) {
+            if (cards.length > 5) {
+                  cards.splice(5, 2);
             }
-            return array;
+            return cards;
       }
 
-      function isStraightDraw(array) {
+      function isStraightDraw(cards) {
             let isStraight = true;
-            array.reduce((cardA, cardB) => {
+            cards.reduce((cardA, cardB) => {
                   let num_A = cardElements(cardA)[1];
                   let num_B = cardElements(cardB)[1];
                   if (isCardAbove10(num_A, num_B)) {
@@ -156,7 +184,7 @@ function hand(holeCards, communityCards) {
 }
 
 // 1. Straight-flush (five consecutive ranks of the same suit). Higher rank is better.
-hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']);
+//hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']);
 
 // 2. Four-of-a-kind (four cards with the same rank). Tiebreaker is first the rank, then the rank of the remaining card.
 hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']);
