@@ -9,10 +9,9 @@ function hand(holeCards, communityCards) {
       }
       let isHandFinished = false;
 
-      while (!isHandFinished) {
-            isHandFinished = straightFlush();
-            break;
-      }
+      straightFlush();
+      flush();
+
 
       function straightFlush() {
             if (isFlushDraw(totalCards)) {
@@ -23,9 +22,8 @@ function hand(holeCards, communityCards) {
                         result.type = 'straight-flush';
                         totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
                         console.log(JSON.stringify(result));
-                      //  return result;
+                        return true;
                   }
-                  return true;
             }
       }
 
@@ -38,7 +36,18 @@ function hand(holeCards, communityCards) {
       }
 
       function flush() {
+            if (isFlushDraw(totalCards)) {
+                  removeSpareCardsByPaint(totalCards);
+                  sortCardsInDescendingOrder(totalCards);
+                  removeSpareCardsByLowestValue(totalCards);
 
+                  if (!isStraightDraw(totalCards)) {
+                        result.type = 'flush';
+                        totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
+                        console.log(JSON.stringify(result));
+                        return true;
+                  }
+            }
       }
 
       function straight() {
@@ -84,12 +93,11 @@ function hand(holeCards, communityCards) {
       }
 
       function removeSpareCardsByPaint(array) {
-            array.reduce((prevCard, currentCard, i) => {
+            array.reduce((prevCard, currentCard) => {
                   const prevCardPaint = cardElements(prevCard)[2];
                   const currentCardPaint = cardElements(currentCard)[2];
                   if (prevCardPaint !== currentCardPaint) {
-                        array.splice(i, 1);
-                        return prevCard = array[i];
+                        array.splice(array.indexOf(prevCard), 1);
                   }
                   return prevCard = currentCard;
             });
