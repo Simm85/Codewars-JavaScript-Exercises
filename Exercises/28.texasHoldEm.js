@@ -18,39 +18,17 @@ function hand(holeCards, communityCards) {
             if (isFlushDraw(totalCards)) {
                   removeSpareCardsByPaint(totalCards);
                   sortCardsInDescendingOrder(totalCards);
+                  removeSpareCardsByLowestValue(totalCards);
                   console.log(totalCards);
                   return true;
             }
       }
 
-      function sortCardsInDescendingOrder(array) {
-            return array.sort((a, b) => {
-                  let cardA = cardElements(a)[1];
-                  let cardB = cardElements(b)[1];
-
-                  const isCardAbove10 = /[AKQJ]{1}/.test(cardA) || /[AKQJ]{1}/.test(cardB);
-
-                  if (isCardAbove10) {
-                        cardA = reassignCardAsNumber(cardA);
-                        cardB = reassignCardAsNumber(cardB);
-                  }
-
-                  return Number(cardB) - Number(cardA);
-            });
-
-            function reassignCardAsNumber(card) {
-                  switch (card) {
-                        case 'A': card = 14;
-                              break;
-                        case 'K': card = 13;
-                              break;
-                        case 'Q': card = 12;
-                              break;
-                        case 'J': card = 11;
-                              break;
-                  }
-                  return card;
+      function removeSpareCardsByLowestValue(array) {
+            if (array.length > 5) {
+                  array.splice(5, 2);
             }
+            return array;
       }
 
       function fourOfAKind() {
@@ -117,6 +95,32 @@ function hand(holeCards, communityCards) {
                   }
                   return prevCard = currentCard;
             });
+      }
+
+      function sortCardsInDescendingOrder(array) {
+            return array.sort((a, b) => {
+                  let cardA = cardElements(a)[1];
+                  let cardB = cardElements(b)[1];
+
+                  const isCardAbove10 = /[AKQJ]{1}/.test(cardA) || /[AKQJ]{1}/.test(cardB);
+
+                  if (isCardAbove10) {
+                        cardA = reassignCardAsNumber(cardA);
+                        cardB = reassignCardAsNumber(cardB);
+                  }
+
+                  return Number(cardB) - Number(cardA);
+            });
+
+            function reassignCardAsNumber(card) {
+                  switch (card) {
+                        case 'A': card = 14; break;
+                        case 'K': card = 13; break;
+                        case 'Q': card = 12; break;
+                        case 'J': card = 11; break;
+                  }
+                  return card;
+            }
       }
 }
 
