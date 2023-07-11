@@ -2,6 +2,7 @@ function hand(holeCards, communityCards) {
       const totalCards = [...holeCards, ...communityCards];
       const pattern = /(?<kind>[AKQJ\d]+)(?<paint>[♠♣♦♥]{1})/;
       const cardElements = string => pattern.exec(string);
+      const isCardAbove10 = (string__1, string__2) => /[AKQJ]{1}/.test(string__1) || /[AKQJ]{1}/.test(string__2);
       const result = {
             type: null,
             ranks: [],
@@ -14,21 +15,18 @@ function hand(holeCards, communityCards) {
       }
 
       function straightFlush() {
-            let isStraight = false;
             if (isFlushDraw(totalCards)) {
                   removeSpareCardsByPaint(totalCards);
                   sortCardsInDescendingOrder(totalCards);
                   removeSpareCardsByLowestValue(totalCards);
-                  console.log(totalCards);
+                  if (isStraightDraw(totalCards)) {
+                        result.type = 'straight-flush';
+                        totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
+                        console.log(JSON.stringify(result));
+                      //  return result;
+                  }
                   return true;
             }
-      }
-
-      function removeSpareCardsByLowestValue(array) {
-            if (array.length > 5) {
-                  array.splice(5, 2);
-            }
-            return array;
       }
 
       function fourOfAKind() {
@@ -102,25 +100,50 @@ function hand(holeCards, communityCards) {
                   let cardA = cardElements(a)[1];
                   let cardB = cardElements(b)[1];
 
-                  const isCardAbove10 = /[AKQJ]{1}/.test(cardA) || /[AKQJ]{1}/.test(cardB);
-
-                  if (isCardAbove10) {
+                  if (isCardAbove10(cardA, cardB)) {
                         cardA = reassignCardAsNumber(cardA);
                         cardB = reassignCardAsNumber(cardB);
                   }
-
                   return Number(cardB) - Number(cardA);
             });
+      }
 
-            function reassignCardAsNumber(card) {
-                  switch (card) {
-                        case 'A': card = 14; break;
-                        case 'K': card = 13; break;
-                        case 'Q': card = 12; break;
-                        case 'J': card = 11; break;
-                  }
-                  return card;
+      function reassignCardAsNumber(card) {
+            switch (card) {
+                  case 'A': card = 14; break;
+                  case 'K': card = 13; break;
+                  case 'Q': card = 12; break;
+                  case 'J': card = 11; break;
             }
+            return card;
+      }
+
+      function removeSpareCardsByLowestValue(array) {
+            if (array.length > 5) {
+                  array.splice(5, 2);
+            }
+            return array;
+      }
+
+      function isStraightDraw(array) {
+            let isStraight = true;
+            array.reduce((cardA, cardB) => {
+                  let num_A = cardElements(cardA)[1];
+                  let num_B = cardElements(cardB)[1];
+                  if (isCardAbove10(num_A, num_B)) {
+                        num_A = reassignCardAsNumber(num_A);
+                        num_B = reassignCardAsNumber(num_B);
+                  }
+
+                  num_A = Number(num_A);
+                  num_B = Number(num_B);
+
+                  if (num_A - num_B > 1) {
+                        isStraight = false;
+                  }
+                  return cardA = cardB;
+            });
+            return isStraight;
       }
 }
 
@@ -128,11 +151,11 @@ function hand(holeCards, communityCards) {
 hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']);
 
 // 2. Four-of-a-kind (four cards with the same rank). Tiebreaker is first the rank, then the rank of the remaining card.
-//hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']);
+hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']);
 
 // 3. Full house (three cards with the same rank, two with another).
 // Tiebreaker is first the rank of the three cards, then rank of the pair.
-//hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']);
+hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']);
 
 // 4. Flush (five cards of the same suit). Higher ranks are better, compared from high to low rank.
 hand(['A♠', 'K♦'], ['J♥', '5♥', '10♥', 'Q♥', '3♥']);
