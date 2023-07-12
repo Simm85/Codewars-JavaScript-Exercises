@@ -8,9 +8,11 @@ function hand(holeCards, communityCards) {
             const pattern = /[AKQJ]{1}/;
             return pattern.test(string_1) || pattern.test(string_2);
       }
-      const result = {
-            type: null,
-            ranks: [],
+      class Result {
+            constructor() {
+                  this.type = null;
+                  this.ranks = [];
+            }
       }
 
       straightFlush();
@@ -23,6 +25,7 @@ function hand(holeCards, communityCards) {
                   sortCardsInDescendingOrder(totalCards);
                   removeSpareCardsByLowestValue(totalCards);
                   if (isStraightDraw(totalCards)) {
+                        const result = new Result();
                         result.type = 'straight-flush';
                         totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
                         console.log(JSON.stringify(result));
@@ -32,28 +35,25 @@ function hand(holeCards, communityCards) {
       }
 
       function fourOfAKind() {
-            isFourOfKind(totalCards);
-      }
-
-      function isFourOfKind(cards) {
+            const result = new Result();
             const cardCollection = {};
-            for (const card of cards) {
+            for (const card of totalCards) {
                   const cardKind = cardElements(card)[1];
                   if (cardCollection.hasOwnProperty(cardKind)) {
                         cardCollection[cardKind]++;
                         continue;
                   }
                   cardCollection[cardKind] = 1;
-
             }
 
-            for (const key in cardCollection) {
-                  if (cardCollection[key] === 4) {
+
+            for (const card in cardCollection) {
+                  if (cardCollection[card] === 4) {
                         result.type = 'four-of-a-kind';
-                        result.ranks.unshift(key);
+                        result.ranks.unshift(card);
                         continue;
                   }
-                  result.ranks.push(key);
+                  result.ranks.push(card);
             }
 
             console.log(cardCollection, JSON.stringify(result));
@@ -70,6 +70,7 @@ function hand(holeCards, communityCards) {
                   sortCardsInDescendingOrder(totalCards);
                   removeSpareCardsByLowestValue(totalCards);
                   if (!isStraightDraw(totalCards)) {
+                        const result = new Result();
                         result.type = 'flush';
                         totalCards.forEach(card => result.ranks.push(cardElements(card)[1]));
                         console.log(JSON.stringify(result));
@@ -184,7 +185,7 @@ function hand(holeCards, communityCards) {
 }
 
 // 1. Straight-flush (five consecutive ranks of the same suit). Higher rank is better.
-//hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']);
+hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']);
 
 // 2. Four-of-a-kind (four cards with the same rank). Tiebreaker is first the rank, then the rank of the remaining card.
 hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']);
