@@ -214,14 +214,6 @@ function hand(holeCards, communityCards) {
                   if (a.length > 1 && b.length > 1) {
                         cardA = cardElements(a)[1];
                         cardB = cardElements(b)[1];
-
-                        if (a.length > 2) {
-                              cardA = 10;
-                        }
-
-                        if (b.length > 2) {
-                              cardB = 10;
-                        }
                   }
 
                   if (isCardAbove10(cardA, cardB)) {
@@ -257,7 +249,8 @@ function hand(holeCards, communityCards) {
             let cardPaint = '';
 
             for (const card of cards) {
-                  cardPaint = cardElements(card)[2];
+                  cardPaint = cardElements(card);
+                  console.log(cardPaint);
                   switch (cardPaint) {
                         case '♠': spades++; break;
                         case '♣': clubs++; break;
@@ -274,23 +267,12 @@ function hand(holeCards, communityCards) {
                   let num_A = cardElements(cardA)[1];
                   let num_B = cardElements(cardB)[1];
 
-                  if (cardA.length > 2) {
-                        num_A = 10;
-                  }
-
-                  if (cardB.length > 2) {
-                        num_B = 10;
-                  }
-
                   if (isCardAbove10(num_A, num_B)) {
                         num_A = reassignCardAsNumber(num_A);
                         num_B = reassignCardAsNumber(num_B);
                   }
 
-                  num_A = Number(num_A);
-                  num_B = Number(num_B);
-
-                  if (num_A - num_B !== 1) {
+                  if (Number(num_A) - Number(num_B) !== 1) {
                         isStraight = false;
                   }
                   return cardA = cardB;
@@ -302,10 +284,6 @@ function hand(holeCards, communityCards) {
             const cardCollection = {};
             for (const card of cards) {
                   let cardKind = cardElements(card)[1];
-
-                  if (card.length === 3) {
-                        cardKind = '10';
-                  }
 
                   if (cardCollection.hasOwnProperty(cardKind)) {
                         cardCollection[cardKind]++;
@@ -320,11 +298,11 @@ function hand(holeCards, communityCards) {
 
 // hand(['8♠','6♠'],['7♠','5♠','9♠','J♠','10♠']); // straight-flush
 
-hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']); // four-of-a-kind
+//hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']); // four-of-a-kind
 
 // hand(['A♠','A♦'],['K♣','K♥','A♥','Q♥','3♦']); // full house
 
-// hand(['A♠','K♦'],['J♥','5♥','10♥','Q♥','3♥']); // flush
+hand(['A♠', 'K♦'], ['J♥', '5♥', '10♥', 'Q♥', '3♥']); // flush
 
 // hand(['Q♠', '2♦'], ['J♣', '10♥', '9♥', 'K♥', '3♦']); // straight
 
