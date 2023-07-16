@@ -195,15 +195,16 @@ function hand(holeCards, communityCards) {
       }
 
       function removeSpareCardsByPaint(cards) {
-            cards.reduce((prevCard, currentCard) => {
-                  const prevCardPaint = cardElements(prevCard)[2];
-                  const currentCardPaint = cardElements(currentCard)[2];
-
-                  if (prevCardPaint !== currentCardPaint) {
-                        cards.splice(cards.indexOf(prevCard), 1);
+            const paints = {};
+            for (const card of cards) {
+                  const cardPaint = cardElements(card)[2];
+                  if (paints.hasOwnProperty(cardPaint)) {
+                        paints[cardPaint]++;
+                        continue;
                   }
-                  return prevCard = currentCard;
-            });
+                  paints[cardPaint] = 1;
+            }
+            console.log(paints);
       }
 
       function sortCardsInDescendingOrder(cards) {
@@ -242,23 +243,16 @@ function hand(holeCards, communityCards) {
       }
 
       function isFlushDraw(cards) {
-            let spades = 0;
-            let clubs = 0;
-            let diamonds = 0;
-            let hearts = 0;
-            let cardPaint = '';
-
+            const paints = {};
             for (const card of cards) {
-                  cardPaint = cardElements(card);
-                  console.log(cardPaint);
-                  switch (cardPaint) {
-                        case '♠': spades++; break;
-                        case '♣': clubs++; break;
-                        case '♦': diamonds++; break;
-                        case '♥': hearts++; break;
+                  const cardPaint = cardElements(card)[2];
+                  if (paints.hasOwnProperty(cardPaint)) {
+                        paints[cardPaint]++;
+                        continue;
                   }
+                  paints[cardPaint] = 1;
             }
-            return [spades, clubs, diamonds, hearts].some(card => card >= 5);
+            return Object.values(paints).some(value => value >= 5);
       }
 
       function isStraightDraw(cards) {
@@ -283,13 +277,11 @@ function hand(holeCards, communityCards) {
       function countAndCollectCards(cards) {
             const cardCollection = {};
             for (const card of cards) {
-                  let cardKind = cardElements(card)[1];
-
+                  const cardKind = cardElements(card)[1];
                   if (cardCollection.hasOwnProperty(cardKind)) {
                         cardCollection[cardKind]++;
                         continue;
                   }
-
                   cardCollection[cardKind] = 1;
             }
             return cardCollection;
