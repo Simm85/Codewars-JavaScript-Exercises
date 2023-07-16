@@ -127,8 +127,13 @@ function hand(holeCards, communityCards) {
             const cardsArray = totalCards.slice();
             const cardCollection = countAndCollectCards(cardsArray);
             const isNumMissing = Object.values(cardCollection).includes(2);
-
-            if (Object.values(cardCollection).includes(3) && !Object.values(cardCollection).includes(4)) {
+            sortCardsInDescendingOrder(cardsArray);
+            
+            if (Object.values(cardCollection).includes(3) &&
+                  !Object.values(cardCollection).includes(4) &&
+                  !isFlushDraw(cardsArray) &&
+                  !isStraightDraw(cardsArray)
+            ) {
                   const result = new Result();
                   Object.keys(cardCollection).forEach(card => result.ranks.push(card));
                   sortCardsInDescendingOrder(result.ranks);
