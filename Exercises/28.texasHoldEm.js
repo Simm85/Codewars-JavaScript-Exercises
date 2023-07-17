@@ -48,9 +48,9 @@ function hand(holeCards, communityCards) {
       }
 
       function straightFlush() {
-            const cardsArray = totalCards.slice();
+            let cardsArray = totalCards.slice();
             if (isFlushDraw(cardsArray)) {
-                  removeSpareCardsByPaint(cardsArray);
+                  cardsArray = removeSpareCardsByPaint(cardsArray);
                   sortCardsInDescendingOrder(cardsArray);
                   removeSpareCardsByLowestValue(cardsArray, 5);
 
@@ -91,9 +91,9 @@ function hand(holeCards, communityCards) {
       }
 
       function flush() {
-            const cardsArray = totalCards.slice();
+            let cardsArray = totalCards.slice();
             if (isFlushDraw(cardsArray)) {
-                  removeSpareCardsByPaint(cardsArray);
+                  cardsArray = removeSpareCardsByPaint(cardsArray);
                   sortCardsInDescendingOrder(cardsArray);
                   removeSpareCardsByLowestValue(cardsArray, 5);
 
@@ -204,7 +204,6 @@ function hand(holeCards, communityCards) {
       function removeSpareCardsByPaint(cards) {
             const paints = {};
             let drawPaint = '';
-            let isCardRemoved = false;
 
             for (const card of cards) {
                   const cardPaint = cardElements(card)[2];
@@ -223,20 +222,12 @@ function hand(holeCards, communityCards) {
                   }
             });
 
-            for (let i = 0; i < cards.length; i++) {
-                  if (isCardRemoved) {
-                        i = 0;
+            return cards.filter(card => {
+                  const cardPaint = cardElements(card)[2];
+                  if (cardPaint === drawPaint) {
+                        return card;
                   }
-
-                  const cardPaint = cardElements(cards[i])[2];
-
-                  if (cardPaint !== drawPaint) {
-                        cards.splice(i, 1);
-                        isCardRemoved = true;
-                        continue;
-                  }
-                  isCardRemoved = false;
-            }
+            });
       }
 
       function sortCardsInDescendingOrder(cards) {
