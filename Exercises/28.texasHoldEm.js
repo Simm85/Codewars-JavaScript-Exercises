@@ -54,7 +54,6 @@ function hand(holeCards, communityCards) {
             let cardsArray = totalCards.slice();
             if (isFlushDraw(cardsArray)) {
                   cardsArray = removeSpareCardsByPaint(cardsArray);
-                  // cardsArray = removeSpareCardsByKind(cardsArray);
                   sortCardsInDescendingOrder(cardsArray);
                   const straightObject = isStraightDraw(cardsArray);
 
@@ -62,7 +61,6 @@ function hand(holeCards, communityCards) {
                         const result = new Result();
                         result.type = 'straight-flush';
                         straightObject.cards.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        //   console.log(JSON.stringify(result));
                         return result;
                   }
             }
@@ -89,7 +87,6 @@ function hand(holeCards, communityCards) {
                   sortCardsInDescendingOrder(result.ranks);
                   result.ranks.unshift(tieBreaker);
                   trimHand(result.ranks, 2);
-                  //    console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -98,6 +95,7 @@ function hand(holeCards, communityCards) {
             const cardsArray = totalCards.slice();
             const cardCollection = countAndCollectCards(cardsArray);
             if (Object.values(cardCollection).includes(2) && Object.values(cardCollection).includes(3)) {
+                  const twoPairs = [];
                   const result = new Result();
                   result.type = 'full house';
                   for (const entry of Object.entries(cardCollection)) {
@@ -105,13 +103,16 @@ function hand(holeCards, communityCards) {
                         if (count === 3) {
                               result.ranks.unshift(card);
                         } else if (count === 2) {
+                              twoPairs.push(card);
                               result.ranks.splice(1, 0, card);
                         } else {
                               result.ranks.push(card);
                         }
                   }
+
+                  sortCardsInDescendingOrder(twoPairs);
+                  result.ranks.splice(1, 1, twoPairs[0]);
                   trimHand(result.ranks, 2);
-                  //console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -128,7 +129,6 @@ function hand(holeCards, communityCards) {
                         const result = new Result();
                         result.type = 'flush';
                         cardsArray.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        //  console.log(JSON.stringify(result));
                         return result;
                   }
             }
@@ -138,14 +138,11 @@ function hand(holeCards, communityCards) {
             let cardsArray = totalCards.slice();
             if (!isFlushDraw(cardsArray)) {
                   sortCardsInDescendingOrder(cardsArray);
-                  //  cardsArray = removeSpareCardsByKind(cardsArray);
-                  //  trimHand(cardsArray, 5);
                   const straightObject = isStraightDraw(cardsArray);
                   if (straightObject.bool) {
                         const result = new Result();
                         result.type = 'straight';
                         straightObject.cards.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        //  console.log(JSON.stringify(result));
                         return result;
                   }
             }
@@ -180,7 +177,6 @@ function hand(holeCards, communityCards) {
                   result.ranks.unshift(tieBreaker);
                   result.type = 'three-of-a-kind';
                   trimHand(result.ranks, 3);
-                  //  console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -188,9 +184,9 @@ function hand(holeCards, communityCards) {
       function pairs() {
             const cardsArray = totalCards.slice();
             const cardCollection = countAndCollectCards(cardsArray);
-            const len = Object.values(cardCollection).filter(value => value === 2).length;
+            const pairs = Object.values(cardCollection).filter(value => value === 2);
 
-            if (len > 0 && !Object.values(cardCollection).includes(3)) {
+            if (pairs.length > 0 && !Object.values(cardCollection).includes(3)) {
                   const result = new Result();
 
                   Object.entries(cardCollection).forEach(entry => {
@@ -203,18 +199,44 @@ function hand(holeCards, communityCards) {
                   });
 
 
-                  sortCardsInDescendingOrder(result.ranks);
-
-                  if (len === 1) {
+                  if (pairs.length === 1) {
                         result.type = 'pair';
-                        const highCard = result.ranks.shift();
-                        result.ranks.splice(1, 0, highCard);
+                        const pairCard = result.ranks.shift();
+                        sortCardsInDescendingOrder(result.ranks);
+                        result.ranks.unshift(pairCard);
                         trimHand(result.ranks, 4);
                   } else {
                         result.type = 'two pair';
+                        let pairCardOne = result.ranks.shift();
+                        let pairCardTwo = result.ranks.shift();
+                        let pairOneAsNumber = 0;
+                        let pairTwoAsNumber = 0;
+                        sortCardsInDescendingOrder(result.ranks);
+
+                        if (isCardAbove10(pairCardOne, pairCardTwo)) {
+                              pairOneAsNumber = reassignCardAsNumber(pairCardOne);
+                              pairTwoAsNumber = reassignCardAsNumber(pairCardTwo);
+                              if (pairOneAsNumber > pairTwoAsNumber) {
+                                    result.ranks.unshift(pairCardTwo);
+                                    result.ranks.splice(0, 0, pairCardOne);
+                              } else {
+                                    result.ranks.unshift(pairCardOne);
+                                    result.ranks.splice(0, 0, pairCardTwo);
+                              }
+                        } else {
+                              pairCardOne = Number(pairCardOne);
+                              pairCardTwo = Number(pairCardTwo);
+
+                              if (pairCardOne > pairCardTwo) {
+                                    result.ranks.unshift(pairCardTwo);
+                                    result.ranks.splice(0, 0, pairCardOne);
+                              } else {
+                                    result.ranks.unshift(pairCardOne);
+                                    result.ranks.splice(0, 0, pairCardTwo);
+                              }
+                        }
                         trimHand(result.ranks, 3);
                   }
-                  // console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -224,7 +246,6 @@ function hand(holeCards, communityCards) {
             const cardCollection = countAndCollectCards(cardsArray);
             sortCardsInDescendingOrder(cardsArray);
             const straightObject = isStraightDraw(cardsArray);
-            // trimHand(cardsArray, 5);
 
             if (!isFlushDraw(cardsArray) &&
                   !straightObject.bool &&
@@ -235,7 +256,6 @@ function hand(holeCards, communityCards) {
                   Object.keys(cardCollection).forEach(card => result.ranks.push(card));
                   sortCardsInDescendingOrder(result.ranks);
                   trimHand(result.ranks, 5);
-                  //  console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -268,16 +288,6 @@ function hand(holeCards, communityCards) {
             });
       }
 
-      function removeSpareCardsByKind(cards) {
-            const result = [];
-            cards.forEach(card => {
-                  const cardKind = cardElements(card)[1];
-                  if (!result.includes(cardKind)) {
-                        result.push(cardKind);
-                  }
-            });
-            return result;
-      }
 
       function sortCardsInDescendingOrder(cards) {
             return cards.sort((a, b) => {
@@ -395,7 +405,7 @@ function hand(holeCards, communityCards) {
 
 //hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']); // four-of-a-kind
 
-hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']); // full house
+//hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']); // full house
 
 //hand(['A♠', '10♥'], ['K♦', '5♥', 'J♥', 'Q♥', '3♥']); // flush
 
@@ -403,8 +413,9 @@ hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']); // full house
 
 //hand(['4♠','9♦'],['J♣','Q♥','Q♠','2♥','Q♦']); // three-of-a-kind
 
-// hand(['K♠', 'Q♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // pair
+//hand(['K♠', 'Q♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // pair
 
-// hand(['K♠', 'J♦'], ['J♣', 'K♥', '9♥', '2♥', '3♦']); // two pair
+hand(['K♠', 'J♦'], ['J♣', 'K♥', '9♥', '2♥', '3♦']); // two pair
 
 //hand(['K♠', 'A♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // nothing
+
