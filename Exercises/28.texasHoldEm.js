@@ -8,7 +8,7 @@ function hand(holeCards, communityCards) {
             const pattern = /[AKQJ]{1}/;
             return pattern.test(string_1) || pattern.test(string_2);
       }
-      //  const Object.values = object => Object.values(object);
+
       class Result {
             constructor() {
                   this.type = null;
@@ -16,12 +16,15 @@ function hand(holeCards, communityCards) {
             }
       }
 
-
       let result = straightFlush();
       if (result) {
             return result;
       }
       result = fourOfAKind();
+      if (result) {
+            return result;
+      }
+      result = fullHouse();
       if (result) {
             return result;
       }
@@ -51,14 +54,15 @@ function hand(holeCards, communityCards) {
             let cardsArray = totalCards.slice();
             if (isFlushDraw(cardsArray)) {
                   cardsArray = removeSpareCardsByPaint(cardsArray);
+                  // cardsArray = removeSpareCardsByKind(cardsArray);
                   sortCardsInDescendingOrder(cardsArray);
-                  removeSpareCardsByLowestValue(cardsArray, 5);
+                  const straightObject = isStraightDraw(cardsArray);
 
-                  if (isStraightDraw(cardsArray)) {
+                  if (straightObject.bool) {
                         const result = new Result();
                         result.type = 'straight-flush';
-                        cardsArray.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        //    console.log(JSON.stringify(result));
+                        straightObject.cards.forEach(card => result.ranks.push(cardElements(card)[1]));
+                        //   console.log(JSON.stringify(result));
                         return result;
                   }
             }
@@ -84,8 +88,30 @@ function hand(holeCards, communityCards) {
                   const tieBreaker = result.ranks.shift();
                   sortCardsInDescendingOrder(result.ranks);
                   result.ranks.unshift(tieBreaker);
-                  removeSpareCardsByLowestValue(result.ranks, 2);
+                  trimHand(result.ranks, 2);
                   //    console.log(JSON.stringify(result));
+                  return result;
+            }
+      }
+
+      function fullHouse() {
+            const cardsArray = totalCards.slice();
+            const cardCollection = countAndCollectCards(cardsArray);
+            if (Object.values(cardCollection).includes(2) && Object.values(cardCollection).includes(3)) {
+                  const result = new Result();
+                  result.type = 'full house';
+                  for (const entry of Object.entries(cardCollection)) {
+                        const [card, count] = entry;
+                        if (count === 3) {
+                              result.ranks.unshift(card);
+                        } else if (count === 2) {
+                              result.ranks.splice(1, 0, card);
+                        } else {
+                              result.ranks.push(card);
+                        }
+                  }
+                  trimHand(result.ranks, 2);
+                  //console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -95,29 +121,31 @@ function hand(holeCards, communityCards) {
             if (isFlushDraw(cardsArray)) {
                   cardsArray = removeSpareCardsByPaint(cardsArray);
                   sortCardsInDescendingOrder(cardsArray);
-                  removeSpareCardsByLowestValue(cardsArray, 5);
+                  const straightObject = isStraightDraw(cardsArray);
+                  trimHand(cardsArray, 5);
 
-                  if (!isStraightDraw(cardsArray)) {
+                  if (!straightObject.bool) {
                         const result = new Result();
                         result.type = 'flush';
                         cardsArray.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        console.log(JSON.stringify(result));
+                        //  console.log(JSON.stringify(result));
                         return result;
                   }
             }
       }
 
       function straight() {
-            const cardsArray = totalCards.slice();
+            let cardsArray = totalCards.slice();
             if (!isFlushDraw(cardsArray)) {
                   sortCardsInDescendingOrder(cardsArray);
-                  removeSpareCardsByLowestValue(cardsArray, 5);
-
-                  if (isStraightDraw(cardsArray)) {
+                  //  cardsArray = removeSpareCardsByKind(cardsArray);
+                  //  trimHand(cardsArray, 5);
+                  const straightObject = isStraightDraw(cardsArray);
+                  if (straightObject.bool) {
                         const result = new Result();
                         result.type = 'straight';
-                        cardsArray.forEach(card => result.ranks.push(cardElements(card)[1]));
-                        //       console.log(JSON.stringify(result));
+                        straightObject.cards.forEach(card => result.ranks.push(cardElements(card)[1]));
+                        //  console.log(JSON.stringify(result));
                         return result;
                   }
             }
@@ -126,27 +154,33 @@ function hand(holeCards, communityCards) {
       function threeOfAkind() {
             const cardsArray = totalCards.slice();
             const cardCollection = countAndCollectCards(cardsArray);
-            const isNumMissing = Object.values(cardCollection).includes(2);
             sortCardsInDescendingOrder(cardsArray);
+            const straightObject = isStraightDraw(cardsArray);
+            trimHand(cardsArray, 5);
 
             if (Object.values(cardCollection).includes(3) &&
-                  !Object.values(cardCollection).includes(4) &&
                   !isFlushDraw(cardsArray) &&
-                  !isStraightDraw(cardsArray)
+                  !straightObject.bool &&
+                  !Object.values(cardCollection).includes(4) &&
+                  !Object.values(cardCollection).includes(2)
             ) {
                   const result = new Result();
-                  Object.keys(cardCollection).forEach(card => result.ranks.push(card));
-                  sortCardsInDescendingOrder(result.ranks);
 
-                  if (!isNumMissing) {
-                        result.type = 'three-of-a-kind';
-                        removeSpareCardsByLowestValue(result.ranks, 3);
-                  } else {
-                        result.type = 'full house';
-                        removeSpareCardsByLowestValue(result.ranks, 2);
+                  for (const entry of Object.entries(cardCollection)) {
+                        const [cardKind, count] = entry;
+                        if (count === 3) {
+                              result.ranks.unshift(cardKind);
+                              continue;
+                        }
+                        result.ranks.push(cardKind);
                   }
 
-                  // console.log(JSON.stringify(result));
+                  const tieBreaker = result.ranks.shift();
+                  sortCardsInDescendingOrder(result.ranks);
+                  result.ranks.unshift(tieBreaker);
+                  result.type = 'three-of-a-kind';
+                  trimHand(result.ranks, 3);
+                  //  console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -159,11 +193,15 @@ function hand(holeCards, communityCards) {
             if (len > 0 && !Object.values(cardCollection).includes(3)) {
                   const result = new Result();
 
-                  Object.keys(cardCollection).forEach(card => {
-                        if (!result.ranks.includes(card)) {
+                  Object.entries(cardCollection).forEach(entry => {
+                        const [card, count] = entry;
+                        if (count === 2) {
+                              result.ranks.unshift(card);
+                        } else {
                               result.ranks.push(card);
                         }
                   });
+
 
                   sortCardsInDescendingOrder(result.ranks);
 
@@ -171,10 +209,10 @@ function hand(holeCards, communityCards) {
                         result.type = 'pair';
                         const highCard = result.ranks.shift();
                         result.ranks.splice(1, 0, highCard);
-                        removeSpareCardsByLowestValue(result.ranks, 4);
+                        trimHand(result.ranks, 4);
                   } else {
                         result.type = 'two pair';
-                        removeSpareCardsByLowestValue(result.ranks, 3);
+                        trimHand(result.ranks, 3);
                   }
                   // console.log(JSON.stringify(result));
                   return result;
@@ -185,18 +223,19 @@ function hand(holeCards, communityCards) {
             const cardsArray = totalCards.slice();
             const cardCollection = countAndCollectCards(cardsArray);
             sortCardsInDescendingOrder(cardsArray);
-            removeSpareCardsByLowestValue(cardsArray, 5);
+            const straightObject = isStraightDraw(cardsArray);
+            // trimHand(cardsArray, 5);
 
             if (!isFlushDraw(cardsArray) &&
-                  !isStraightDraw(cardsArray) &&
+                  !straightObject.bool &&
                   Object.values(cardCollection).every(value => value === 1)
             ) {
                   const result = new Result();
                   result.type = 'nothing';
                   Object.keys(cardCollection).forEach(card => result.ranks.push(card));
                   sortCardsInDescendingOrder(result.ranks);
-                  removeSpareCardsByLowestValue(result.ranks, 5);
-                  // console.log(JSON.stringify(result));
+                  trimHand(result.ranks, 5);
+                  //  console.log(JSON.stringify(result));
                   return result;
             }
       }
@@ -214,7 +253,6 @@ function hand(holeCards, communityCards) {
                   paints[cardPaint] = 1;
             }
 
-
             Object.entries(paints).some(value => {
                   const [paint, count] = value;
                   if (count >= 5) {
@@ -230,21 +268,32 @@ function hand(holeCards, communityCards) {
             });
       }
 
+      function removeSpareCardsByKind(cards) {
+            const result = [];
+            cards.forEach(card => {
+                  const cardKind = cardElements(card)[1];
+                  if (!result.includes(cardKind)) {
+                        result.push(cardKind);
+                  }
+            });
+            return result;
+      }
+
       function sortCardsInDescendingOrder(cards) {
             return cards.sort((a, b) => {
-                  let cardA = a;
-                  let cardB = b;
+                  let cardOne = a;
+                  let cardTwo = b;
 
                   if (a.length > 1 && b.length > 1) {
-                        cardA = cardElements(a)[1];
-                        cardB = cardElements(b)[1];
+                        cardOne = cardElements(a)[1];
+                        cardTwo = cardElements(b)[1];
                   }
 
-                  if (isCardAbove10(cardA, cardB)) {
-                        cardA = reassignCardAsNumber(cardA);
-                        cardB = reassignCardAsNumber(cardB);
+                  if (isCardAbove10(cardOne, cardTwo)) {
+                        cardOne = reassignCardAsNumber(cardOne);
+                        cardTwo = reassignCardAsNumber(cardTwo);
                   }
-                  return Number(cardB) - Number(cardA);
+                  return Number(cardTwo) - Number(cardOne);
             });
       }
 
@@ -258,7 +307,7 @@ function hand(holeCards, communityCards) {
             return card;
       }
 
-      function removeSpareCardsByLowestValue(cards, n) {
+      function trimHand(cards, n) {
             if (cards.length > n) {
                   cards.splice(n, cards.length);
             }
@@ -279,22 +328,53 @@ function hand(holeCards, communityCards) {
       }
 
       function isStraightDraw(cards) {
-            let isStraight = true;
-            cards.reduce((cardA, cardB) => {
-                  let num_A = cardElements(cardA)[1];
-                  let num_B = cardElements(cardB)[1];
+            let counter = 0;
+            const result = { bool: false, cards: [], cardAsNumbers: [] };
 
-                  if (isCardAbove10(num_A, num_B)) {
-                        num_A = reassignCardAsNumber(num_A);
-                        num_B = reassignCardAsNumber(num_B);
+            cards.reduce((a, b) => {
+                  let cardOne = a;
+                  let cardTwo = b;
+
+                  if (a.length > 1 && b.length > 1) {
+                        cardOne = cardElements(a)[1];
+                        cardTwo = cardElements(b)[1];
                   }
 
-                  if (Number(num_A) - Number(num_B) !== 1) {
-                        isStraight = false;
+                  if (isCardAbove10(cardOne, cardTwo)) {
+                        cardOne = reassignCardAsNumber(cardOne);
+                        cardTwo = reassignCardAsNumber(cardTwo);
                   }
-                  return cardA = cardB;
+
+                  if (typeof cardOne === 'string' || typeof cardTwo === 'string') {
+                        cardOne = Number(cardOne);
+                        cardTwo = Number(cardTwo);
+                  }
+
+                  if (counter < 4) {
+                        if (cardOne - cardTwo === 1) {
+                              counter++;
+                              result.cards.push(a);
+                              result.cardAsNumbers.push(cardOne);
+
+                              if (counter === 4) {
+                                    result.cards.push(b);
+                                    result.cardAsNumbers.push(cardTwo);
+                              }
+                        }
+                  }
+                  return a = b;
             });
-            return isStraight;
+
+            if (result.cardAsNumbers.length === 5) {
+                  result.bool = true;
+                  result.cardAsNumbers.reduce((a, b) => {
+                        if (a - b !== 1) {
+                              result.bool = false;
+                        }
+                        return a = b;
+                  });
+            }
+            return result;
       }
 
       function countAndCollectCards(cards) {
@@ -311,20 +391,20 @@ function hand(holeCards, communityCards) {
       }
 }
 
-// hand(['8♠','6♠'],['7♠','5♠','9♠','J♠','10♠']); // straight-flush
+//hand(['8♠', '6♠'], ['7♠', '5♠', '9♠', 'J♠', '10♠']); // straight-flush
 
 //hand(['2♠', '3♦'], ['2♣', '2♥', '3♠', '3♥', '2♦']); // four-of-a-kind
 
-// hand(['A♠','A♦'],['K♣','K♥','A♥','Q♥','3♦']); // full house
+hand(['A♠', 'A♦'], ['K♣', 'K♥', 'A♥', 'Q♥', '3♦']); // full house
 
-hand(['A♠', '10♥'], ['K♦', '5♥', 'J♥', 'Q♥', '3♥']); // flush
+//hand(['A♠', '10♥'], ['K♦', '5♥', 'J♥', 'Q♥', '3♥']); // flush
 
-// hand(['Q♠', '2♦'], ['J♣', '10♥', '9♥', 'K♥', '3♦']); // straight
+//hand(['Q♠', '2♦'], ['J♣', '10♥', '9♥', 'K♥', '3♦']); // straight
 
-// hand(['4♠', '9♦'], ['J♣', 'Q♥', 'Q♠', '2♥', 'Q♦']); // three-of-a-kind
+//hand(['4♠','9♦'],['J♣','Q♥','Q♠','2♥','Q♦']); // three-of-a-kind
 
 // hand(['K♠', 'Q♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // pair
 
 // hand(['K♠', 'J♦'], ['J♣', 'K♥', '9♥', '2♥', '3♦']); // two pair
 
-// hand(['K♠', 'A♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // nothing
+//hand(['K♠', 'A♦'], ['J♣', 'Q♥', '9♥', '2♥', '3♦']); // nothing
